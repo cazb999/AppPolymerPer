@@ -1,0 +1,117 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../controladores/login-controlador.html">
+
+<dom-module id="login-interfaz">
+    <template>
+        <style>
+            :host {
+                display: inline-block
+            }
+        </style>
+
+        <paper-input always-float-label label="Usuario" id="usuario"></paper-input>
+        <paper-input always-float-label label="Contraseña" id="clave"></paper-input>
+        <button on-click="verificar">Login</button>
+
+        <template is="dom-if" if="{{domIf}}">
+            <login-controlador 
+                on-respuesta-mid="getRespuestaMid"
+                on-error-mid="getError"
+                clave="[[clave]]"
+                usuario="[[usuario]]"
+            ></login-controlador>
+            <p>Cargando...</p>
+        </template>
+
+        <template is="dom-if" if="{{ifRespuesta}}">
+            [[loggeado()]]
+        </template>
+        <template is="dom-if" if="{{error}}">
+            [[noLoggeado()]]
+        </template>
+    </template>
+
+    <script>
+        class LoginInterfaz extends Polymer.Element {
+            static get is() {
+                return 'login-interfaz';
+            }
+
+            static get properties() {
+                return {
+                    usuario: {
+                        type: String
+                    },
+                    clave: {
+                        type: String
+                    },
+                    domIf: {
+                        type: Boolean,
+                        value: false
+                    },
+                    res: {
+                        type: String,
+                        value: ""
+                    },
+                    ifRespuesta: {
+                        type: Boolean,
+                        value: false
+                    },
+                    error: {
+                        type: String,
+                        value: ""
+                    }
+                };
+            }
+
+            ready() {
+                super.ready();
+
+            }
+
+            getError(e){
+                console.log(e.detail.error);
+                if(e.detail.error=="403"){
+                    this.error = true;
+                }
+            }
+
+            verificar(){
+                this.usuario = this.shadowRoot.getElementById('usuario').value;
+                this.clave = this.shadowRoot.getElementById('clave').value;
+
+                if(this.usuario != undefined && this.clave != undefined){
+                    this.domIf = true;
+                }else{
+                    this.domIf = false;
+                }                
+            }
+
+            loggeado(){
+                alert("login-request-success");
+            }
+
+            noLoggeado(){
+                alert("login-request-error");
+            }
+
+            getRespuestaMid(e){
+                this.res = e.detail.enviar;
+                this.seguir(this.res);
+                console.log(e.detail.enviar);
+            }
+
+            seguir(valor){
+                if(valor =="OK"){
+                    this.ifRespuesta=true;
+                }
+            }
+
+        }
+
+        window.customElements.define(LoginInterfaz.is, LoginInterfaz);
+    </script>
+</dom-module>

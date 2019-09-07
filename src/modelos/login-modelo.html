@@ -1,0 +1,94 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="login-modelo">
+    <template>
+        <style>
+            :host {
+                display: block
+            }
+        </style>
+        
+        <iron-ajax
+              auto
+              method="post"
+              url="https://artichoke.platform.bbva.com/TechArchitecture/co/grantingTicket/V02"
+              body='[[body]]'
+              handle-as="json"
+              content-type="application/json"
+              last-response="{{lastResponse}}"
+              on-response="enviarDatos"
+              on-error="errorReq"
+              >
+    </iron-ajax>
+
+    </template>
+
+    <script>
+        class LoginModelo extends Polymer.Element {
+            static get is() {
+                return 'login-modelo';
+            }
+
+            static get properties() {
+                return {
+                    usuario: {
+                        type: String,
+                        value: ""
+                    },
+                    clave: {
+                        type: String,
+                        value: ""
+                    },
+                    body: {
+                        type: JSON,
+                        computed: "concatenarDatos(usuario, clave)"
+                    }
+                };
+            }
+
+            ready() {
+                super.ready();
+            }
+
+            enviarDatos(event, detail){
+                console.log(detail);
+                this.dispatchEvent(new CustomEvent('login-request-success', {
+                    detail: {
+                        respuesta: detail.response
+                    }
+                }));
+            }
+
+            errorReq(e){
+                this.dispatchEvent(new CustomEvent('login-request-error', {
+                    detail: {
+                        error: "403"
+                    }
+                }));
+            }
+
+            concatenarDatos(user, pswd){
+                return {
+                        "authentication": {
+                            "userID": user,
+                            "consumerID": "10000033",
+                            "authenticationType": "02",
+                            "authenticationData": [{
+                                "idAuthenticationData": "password",
+                                "authenticationData": [pswd]
+                            }]
+                        },
+                        "backendUserRequest": {
+                            "userId": "",
+                            "accessCode": user,
+                            "dialogId": ""
+                        }
+                    }
+            }
+
+        }
+
+        window.customElements.define(LoginModelo.is, LoginModelo);
+    </script>
+</dom-module>

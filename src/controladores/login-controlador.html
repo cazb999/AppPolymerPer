@@ -1,0 +1,101 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../modelos/login-modelo.html">
+
+<dom-module id="login-controlador">
+    <template>
+        <style>
+            :host {
+                display: block
+            }
+        </style>
+        <login-modelo 
+            on-login-request-success="getRespuesta"
+            on-login-request-error="getError"
+            clave="[[clave]]"
+            usuario="[[usuario]]"
+        ></login-modelo>
+    </template>
+
+    <script>
+        class LoginControlador extends Polymer.Element {
+            static get is() {
+                return 'login-controlador';
+            }
+
+            static get properties() {
+                return {
+                    jsonRespuesta: {
+                        type: JSON,
+                        value: ()=>{
+                            return {}
+                        }
+                    },
+                    usuario: {
+                        type: String,
+                        value: ""
+                    },
+                    clave: {
+                        type: String,
+                        value: ""
+                    },
+                    respuesta: {
+                        type: String,
+                        value: "",
+                        observer: '_activeChanged'
+                    },
+                    error: {
+                        type: String,
+                        value: "",
+                        observer: '_activeError'
+                    }
+                };
+            }
+
+            ready() {
+                super.ready();
+            }
+
+            getRespuesta(e){
+                console.log(e.detail.respuesta.authenticationResponse);
+                this.jsonRespuesta = e.detail.respuesta.authenticationResponse;
+                this.respuesta = this.jsonRespuesta.authenticationState;
+            }
+
+            getError(e){
+                // console.log(e.detail.error);
+                this.error = e.detail.error;
+            }
+
+            json(obj) {
+                return JSON.stringify(obj, null, 2);
+            }
+
+            enviarDatos(){
+                this.dispatchEvent(new CustomEvent('respuesta-mid', {
+                    detail: {
+                        enviar: this.respuesta
+                    }
+                }));
+            }
+
+            enviarError(){
+                this.dispatchEvent(new CustomEvent('error-mid', {
+                    detail: {
+                        error: this.error
+                    }
+                }));
+            }
+
+            _activeChanged(){
+                this.enviarDatos();
+            }
+
+            _activeError(){
+                this.enviarError();
+            }
+
+        }
+
+        window.customElements.define(LoginControlador.is, LoginControlador);
+    </script>
+</dom-module>
